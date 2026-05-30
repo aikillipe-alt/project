@@ -5,7 +5,7 @@
 
     // ========== Global State ==========
     const State = {
-        mode: 'value', // 'value' or 'speed'
+        mode: 'value',
         curve: {
             name: 'AE Default',
             group: 'Basic',
@@ -27,7 +27,6 @@
 
     // ========== DOM References ==========
     const DOM = {
-        // Buttons
         readBtn: document.getElementById('readBtn'),
         smartBtn: document.getElementById('smartBtn'),
         liveSyncBtn: document.getElementById('liveSyncBtn'),
@@ -41,11 +40,9 @@
         exportBtn: document.getElementById('exportBtn'),
         importBtn: document.getElementById('importBtn'),
         
-        // Mode toggles
         valueModeBtn: document.getElementById('valueModeBtn'),
         speedModeBtn: document.getElementById('speedModeBtn'),
         
-        // Controls
         speedControls: document.getElementById('speedControls'),
         speedOutSlider: document.getElementById('speedOutSlider'),
         speedOutNum: document.getElementById('speedOutNum'),
@@ -56,31 +53,25 @@
         infInSlider: document.getElementById('infInSlider'),
         infInNum: document.getElementById('infInNum'),
         
-        // Canvas
         canvas: document.getElementById('graph'),
         ctx: document.getElementById('graph').getContext('2d'),
         
-        // Presets
         filter: document.getElementById('filter'),
         nameInput: document.getElementById('nameInput'),
         presetList: document.getElementById('presetList'),
         
-        // Switches
         allKeys: document.getElementById('allKeys'),
         mirrorDrag: document.getElementById('mirrorDrag'),
         clampY: document.getElementById('clampY'),
         continuous: document.getElementById('continuous'),
         autoBezier: document.getElementById('autoBezier'),
         
-        // Status
         readout: document.getElementById('readout'),
         status: document.getElementById('status'),
         
-        // File input
         importFile: document.getElementById('importFile')
     };
 
-    // ========== CSInterface ==========
     let csInterface = null;
     try {
         csInterface = new CSInterface();
@@ -88,7 +79,7 @@
         console.warn('CSInterface not available');
     }
 
-    // ========== Smart Presets Database ==========
+    // ========== Presets Database ==========
     const PresetsDB = {
         Basic: [
             { name: 'AE Default', x1: 0.333, y1: 0, x2: 0.667, y2: 1, interpolation: 'bezier', graphMode: 'value' },
@@ -121,7 +112,6 @@
     }
 
     function bezier(t, x1, y1, x2, y2) {
-        // Cubic Bezier evaluation
         const mt = 1 - t;
         const mt3 = mt * mt * mt;
         const t3 = t * t * t;
@@ -157,16 +147,13 @@
         const width = canvas.offsetWidth;
         const height = canvas.offsetHeight;
         
-        // Set canvas resolution
         canvas.width = width * window.devicePixelRatio;
         canvas.height = height * window.devicePixelRatio;
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-        // Clear background
         ctx.fillStyle = 'rgba(26, 0, 51, 0.5)';
         ctx.fillRect(0, 0, width, height);
 
-        // Draw grid
         drawGrid(width, height);
 
         if (State.mode === 'value') {
@@ -175,7 +162,6 @@
             drawSpeedGraph(width, height);
         }
 
-        // Draw handles
         drawHandles(width, height);
     }
 
@@ -186,7 +172,6 @@
         ctx.strokeStyle = 'rgba(93, 61, 159, 0.2)';
         ctx.lineWidth = 0.5;
 
-        // Vertical grid
         for (let x = 0; x <= width; x += gridSize) {
             ctx.beginPath();
             ctx.moveTo(x, 0);
@@ -194,7 +179,6 @@
             ctx.stroke();
         }
 
-        // Horizontal grid
         for (let y = 0; y <= height; y += gridSize) {
             ctx.beginPath();
             ctx.moveTo(0, y);
@@ -202,7 +186,6 @@
             ctx.stroke();
         }
 
-        // Center lines
         ctx.strokeStyle = 'rgba(139, 95, 191, 0.3)';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -221,7 +204,6 @@
         const graphWidth = width - padding * 2;
         const graphHeight = height - padding * 2;
 
-        // Draw curve
         const points = sampleCurve(State.curve, 150);
         ctx.beginPath();
         for (let i = 0; i < points.length; i++) {
@@ -237,7 +219,6 @@
         ctx.lineJoin = 'round';
         ctx.stroke();
 
-        // Draw tangent lines
         drawTangents(width, height, padding);
     }
 
@@ -248,7 +229,6 @@
         const graphHeight = height - padding * 2;
         const centerY = height - padding - graphHeight / 2;
 
-        // Draw derivative curve (speed)
         ctx.beginPath();
         let firstPoint = true;
         for (let i = 0; i <= 100; i++) {
@@ -273,7 +253,6 @@
         ctx.lineJoin = 'round';
         ctx.stroke();
 
-        // Draw center line
         ctx.strokeStyle = 'rgba(139, 95, 191, 0.3)';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -287,7 +266,6 @@
         const graphWidth = width - padding * 2;
         const graphHeight = height - padding * 2;
 
-        // Out tangent
         const x1 = padding + State.curve.x1 * graphWidth;
         const y1 = height - padding - State.curve.y1 * graphHeight;
         ctx.strokeStyle = 'rgba(139, 95, 191, 0.5)';
@@ -298,7 +276,6 @@
         ctx.lineTo(x1, y1);
         ctx.stroke();
 
-        // In tangent
         const x2 = padding + State.curve.x2 * graphWidth;
         const y2 = height - padding - State.curve.y2 * graphHeight;
         ctx.beginPath();
@@ -314,12 +291,10 @@
         const graphWidth = width - padding * 2;
         const graphHeight = height - padding * 2;
 
-        // Out handle
         const x1 = padding + State.curve.x1 * graphWidth;
         const y1 = height - padding - State.curve.y1 * graphHeight;
         drawHandle(ctx, x1, y1, State.draggedHandle === 'out');
 
-        // In handle
         const x2 = padding + State.curve.x2 * graphWidth;
         const y2 = height - padding - State.curve.y2 * graphHeight;
         drawHandle(ctx, x2, y2, State.draggedHandle === 'in');
@@ -346,23 +321,14 @@
 
     // ========== Event Listeners ==========
     function initEventListeners() {
-        // Mode toggle
         DOM.valueModeBtn.addEventListener('click', () => setMode('value'));
         DOM.speedModeBtn.addEventListener('click', () => setMode('speed'));
-
-        // Reset
         DOM.resetBtn.addEventListener('click', resetCurve);
-
-        // Apply
         DOM.applyBtn.addEventListener('click', applyCurve);
-
-        // Canvas interaction
         DOM.canvas.addEventListener('mousedown', canvasMouseDown);
         DOM.canvas.addEventListener('mousemove', canvasMouseMove);
         DOM.canvas.addEventListener('mouseup', canvasMouseUp);
         DOM.canvas.addEventListener('mouseleave', canvasMouseLeave);
-
-        // Speed controls
         DOM.speedOutSlider.addEventListener('input', updateFromSpeedControls);
         DOM.speedOutNum.addEventListener('change', updateFromSpeedControls);
         DOM.speedInSlider.addEventListener('input', updateFromSpeedControls);
@@ -371,31 +337,17 @@
         DOM.infOutNum.addEventListener('change', updateFromSpeedControls);
         DOM.infInSlider.addEventListener('input', updateFromSpeedControls);
         DOM.infInNum.addEventListener('change', updateFromSpeedControls);
-
-        // Live Sync
         DOM.liveSyncBtn.addEventListener('click', toggleLiveSync);
-
-        // Read curve
         DOM.readBtn.addEventListener('click', readCurveFromAE);
-
-        // Capture
         DOM.captureBtn.addEventListener('click', captureCurve);
-
-        // Presets
         DOM.filter.addEventListener('change', renderPresets);
         DOM.presetList.addEventListener('click', selectPreset);
-
-        // Save/Export/Import
         DOM.saveBtn.addEventListener('click', savePreset);
         DOM.exportBtn.addEventListener('click', exportPresets);
         DOM.importBtn.addEventListener('click', () => DOM.importFile.click());
         DOM.importFile.addEventListener('change', importPresets);
-
-        // Delete/Copy
         DOM.deleteBtn.addEventListener('click', deletePreset);
         DOM.copyBtn.addEventListener('click', copyPreset);
-
-        // Help
         DOM.helpBtn.addEventListener('click', showHelp);
     }
 
@@ -428,7 +380,7 @@
         updateReadout();
         updateSpeedControls();
         drawGraph();
-        showStatus('Curve reset to AE F9 Easy Ease');
+        showStatus('✓ Reset to AE F9 Easy Ease');
     }
 
     function canvasMouseDown(e) {
@@ -547,11 +499,7 @@
     }
 
     function readCurveFromAE() {
-        if (!csInterface) {
-            showStatus('After Effects not available');
-            return;
-        }
-        readCurveFromAE();
+        showStatus('Select keyframes and use CAPTURE instead');
     }
 
     function captureCurve() {
@@ -605,7 +553,7 @@
             if (csInterface && State.liveSyncEnabled) {
                 captureCurve();
             }
-        }, 300); // 300ms polling
+        }, 300);
     }
 
     function stopLiveSync() {
@@ -630,9 +578,6 @@
         presets.forEach((preset, index) => {
             const item = document.createElement('div');
             item.className = 'preset-item';
-            if (State.selectedPresetIndex === index && filter !== 'Custom') {
-                item.classList.add('active');
-            }
             item.innerHTML = `
                 <span class="preset-item-name">${preset.name}</span>
                 <span class="preset-item-group">${preset.group}</span>
@@ -646,6 +591,22 @@
             });
             DOM.presetList.appendChild(item);
         });
+    }
+
+    function selectPreset(e) {
+        const item = e.target.closest('.preset-item');
+        if (item) {
+            const name = item.querySelector('.preset-item-name').textContent;
+            const filter = DOM.filter.value;
+            let presets = filter === 'All' ? [] : PresetsDB[filter];
+            const preset = presets.find(p => p.name === name);
+            if (preset) {
+                State.curve = { ...preset };
+                updateReadout();
+                updateSpeedControls();
+                drawGraph();
+            }
+        }
     }
 
     function savePreset() {
@@ -719,7 +680,7 @@
     }
 
     function showHelp() {
-        alert(`SpectraFlow - Smart AE Graph Engine v3.0\n\nModes:\n• VALUE GRAPH: Shows keyframe easing curve\n• SPEED GRAPH: Shows velocity/speed of change\n\nDrag Handles:\n• Click and drag curve handles to adjust easing\n• Horizontal = Influence (timing extent)\n• Vertical = Easing strength\n\nLive Sync:\n• Enable to mirror changes from After Effects\n• Updates every 300ms automatically\n\nRead/Capture:\n• READ: Get current easing from selected keyframes\n• APPLY: Apply curve to selected keyframes\n\n100% Native Graph Mirroring - Perfect sync guaranteed!`);
+        alert(`SpectraFlow - Smart AE Graph Engine v3.0\n\n📊 VALUE GRAPH\nShows keyframe easing curve with handles\n\n⚡ SPEED GRAPH\nShows velocity/rate of change over time\n\n🎮 DRAG HANDLES\nHorizontal = Influence (timing extent)\nVertical = Easing strength\n\n🔄 LIVE SYNC\nEnable to mirror changes from After Effects (300ms)\n\n📸 CAPTURE\nGet current easing from selected keyframes\n\n100% Native Graph Mirroring - Perfect sync guaranteed!`);
     }
 
     function saveToLocalStorage() {
@@ -748,7 +709,6 @@
         resetCurve();
         renderPresets();
         
-        // Responsive canvas
         window.addEventListener('resize', () => {
             setTimeout(drawGraph, 100);
         });
@@ -756,7 +716,6 @@
         showStatus('SpectraFlow Ready - Perfect Native Sync Active');
     }
 
-    // Start when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {

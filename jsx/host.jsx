@@ -1,11 +1,10 @@
-/* SpectraFlow - Smart AE Graph Engine JSX Host */
+/* SpectraFlow CEP host script for After Effects */
 
 (function () {
     if (!$._SpectraFlow) {
         $._SpectraFlow = {};
     }
 
-    // ========== Utility Functions ==========
     function parsePayload(text) {
         try {
             return JSON.parse(text || "{}");
@@ -121,7 +120,6 @@
         return keys || [];
     }
 
-    // ========== Smart Curve Calculations ==========
     function easeLength(prop, keyIndex) {
         try {
             return prop.keyInTemporalEase(keyIndex).length;
@@ -166,7 +164,6 @@
         return (b - a) / dt;
     }
 
-    // ========== Bezier Curve Helpers ==========
     function outInfluence(curve) {
         return clamp(curve.x1 * 100, 0.1, 100);
     }
@@ -184,7 +181,6 @@
         return Math.abs(dx) < 0.0001 ? 0 : (1 - curve.y2) / dx;
     }
 
-    // ========== Smart Curve Creator ==========
     function makeEaseArray(prop, keyIndex, incoming, curve) {
         var count = easeLength(prop, keyIndex);
         var influence = incoming ? inInfluence(curve) : outInfluence(curve);
@@ -207,7 +203,6 @@
         return output;
     }
 
-    // ========== Safe Curve Validation ==========
     function safeCurve(curve) {
         curve = curve || {};
         return {
@@ -222,7 +217,6 @@
         };
     }
 
-    // ========== Main API Functions ==========
     $._SpectraFlow.applyEase = function (payloadText) {
         try {
             var payload = parsePayload(payloadText);
@@ -289,7 +283,6 @@
         }
     };
 
-    // ========== Smart Capture ==========
     $._SpectraFlow.captureEase = function (payloadText) {
         try {
             var payload = parsePayload(payloadText);
@@ -369,7 +362,6 @@
         }
     };
 
-    // ========== Selection Intelligence ==========
     $._SpectraFlow.selectionInfo = function (payloadText) {
         try {
             var payload = parsePayload(payloadText);
