@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SpectraFlow</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <main class="app">
+
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 12 C3 12 4 4 8 4 C12 4 13 12 15 12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <span class="brand-name">SPECTRA<span class="brand-accent">FLOW</span></span>
+                <span class="brand-sub">AE GRAPH ENGINE</span>
+            </div>
+            <div class="top-actions">
+                <button class="mini" id="readBtn" title="Read easing from selected keyframes">READ</button>
+                <button class="mini accent" id="smartBtn" title="Auto-pick best preset for selection">K·SET</button>
+                <button class="mini" id="liveSyncBtn" title="Live sync with AE graph editor">⟳ SYNC</button>
+                <button class="icon" id="helpBtn" title="Help">?</button>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button data-preset="AE Default">EASE ①</button>
+            <button data-preset="Easy Out">EASE OUT</button>
+            <button data-preset="Easy In">EASE IN</button>
+            <button data-preset="Easy In Out">EASE I/O</button>
+            <button data-preset="Linear">LINEAR</button>
+            <button class="active" id="customBtn">CUSTOM</button>
+        </nav>
+
+        <section class="mode-toggle">
+            <button class="active" id="valueModeBtn">◈ VALUE GRAPH</button>
+            <button id="speedModeBtn">⚡ SPEED GRAPH</button>
+        </section>
+
+        <!-- Speed Graph Controls -->
+        <section class="speed-controls" id="speedControls" style="display:none;">
+            <div class="speed-row">
+                <div class="speed-field">
+                    <label>OUT SPEED</label>
+                    <div class="speed-input-wrap">
+                        <input type="range" id="speedOutSlider" min="0" max="500" value="0" step="1">
+                        <input type="number" id="speedOutNum" min="0" max="500" value="0" step="1">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="speed-field">
+                    <label>IN SPEED</label>
+                    <div class="speed-input-wrap">
+                        <input type="range" id="speedInSlider" min="0" max="500" value="0" step="1">
+                        <input type="number" id="speedInNum" min="0" max="500" value="0" step="1">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="speed-row">
+                <div class="speed-field">
+                    <label>OUT INFLUENCE</label>
+                    <div class="speed-input-wrap">
+                        <input type="range" id="infOutSlider" min="0.1" max="100" value="33.3" step="0.1">
+                        <input type="number" id="infOutNum" min="0.1" max="100" value="33.3" step="0.1">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+                <div class="speed-field">
+                    <label>IN INFLUENCE</label>
+                    <div class="speed-input-wrap">
+                        <input type="range" id="infInSlider" min="0.1" max="100" value="33.3" step="0.1">
+                        <input type="number" id="infInNum" min="0.1" max="100" value="33.3" step="0.1">
+                        <span class="unit">%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="graph-shell">
+            <canvas id="graph"></canvas>
+        </section>
+
+        <section class="actions">
+            <button id="resetBtn" title="Reset to AE default (F9 Easy Ease)">↺ RESET</button>
+            <button class="primary" id="applyBtn">▶ APPLY EASE</button>
+            <button id="saveBtn" title="Save as new preset">+ SAVE</button>
+        </section>
+
+        <section class="switches">
+            <label class="check"><input type="checkbox" id="allKeys"><span class="box"></span><span>All keys</span></label>
+            <label class="check"><input type="checkbox" id="mirrorDrag"><span class="box"></span><span>Mirror</span></label>
+            <label class="check"><input type="checkbox" id="clampY"><span class="box"></span><span>Clamp</span></label>
+            <label class="check"><input type="checkbox" id="continuous" checked><span class="box"></span><span>Continuous</span></label>
+            <label class="check"><input type="checkbox" id="autoBezier"><span class="box"></span><span>Auto</span></label>
+        </section>
+
+        <section class="presets">
+            <div class="preset-head">
+                <span class="preset-label">PRESETS</span>
+                <div class="preset-tools">
+                    <button id="exportBtn" title="Export custom presets to JSON">EXPORT</button>
+                    <button id="importBtn" title="Import presets from JSON">IMPORT</button>
+                </div>
+            </div>
+            <div class="preset-row">
+                <select id="filter">
+                    <option>All</option>
+                    <option>Basic</option>
+                    <option>Fast</option>
+                    <option>Impact</option>
+                    <option>Soft</option>
+                    <option>Custom</option>
+                </select>
+                <input id="nameInput" type="text" value="SpectraFlow" placeholder="Preset name…">
+            </div>
+            <div id="presetList" class="preset-list"></div>
+            <div class="preset-bottom">
+                <button id="captureBtn" title="Capture easing from selected keyframes">CAPTURE</button>
+                <button id="deleteBtn" title="Delete selected custom preset">DELETE</button>
+                <button id="copyBtn" title="Duplicate active preset">COPY</button>
+            </div>
+        </section>
+
+        <footer class="statusbar">
+            <span id="readout">Out 33.3% · In 33.3%</span>
+            <span id="status">Ready.</span>
+        </footer>
+
+    </main>
+
+    <input id="importFile" type="file" accept="application/json,.json">
+    <script src="./js/csinterface-lite.js"></script>
+    <script src="./js/main.js"></script>
+</body>
+</html>
